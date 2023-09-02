@@ -1,7 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_card_scanner/card_issuer.dart';
+import 'package:flutter_card_scanner/countries/select_banned_countries.dart';
+import 'package:flutter_card_scanner/models/card_issuer.dart';
 import 'package:flutter_card_scanner/db/database.dart';
 import 'package:flutter_card_scanner/db/models/credit_card.dart';
 import 'package:flutter_card_scanner/extensions/string_x.dart';
@@ -21,6 +22,17 @@ class _CreditCardsViewState extends State<CreditCardsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('View credit cards')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const SelectBannedCountriesView(),
+            ),
+          );
+        },
+        label: const Text('Countries'),
+        icon: const Icon(Icons.add),
+      ),
       body: StreamBuilder<List<CreditCard>>(
           stream: DatabaseManager().watchAllCreditCards(),
           builder: (context, snapshot) {

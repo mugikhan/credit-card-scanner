@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter_card_scanner/card_issuer.dart';
-import 'package:flutter_card_scanner/card_utils.dart';
+import 'package:flutter_card_scanner/models/card_issuer.dart';
+import 'package:flutter_card_scanner/utils/card_utils.dart';
 import 'package:flutter_card_scanner/credit_cards_view.dart';
 import 'package:flutter_card_scanner/db/database.dart';
 import 'package:flutter_card_scanner/db/models/credit_card.dart';
@@ -14,7 +14,7 @@ import 'package:flutter_card_scanner/extensions/string_x.dart';
 import 'package:flutter_card_scanner/models/card_details.dart';
 import 'package:flutter_card_scanner/models/exceptions.dart';
 import 'package:flutter_card_scanner/services/custom_snackbar.dart';
-import 'package:flutter_card_scanner/text_painter.dart';
+import 'package:flutter_card_scanner/widgets/text_painter.dart';
 import 'package:flutter_card_scanner/widgets/custom_dropdown.dart';
 import 'package:flutter_card_scanner/widgets/custom_textfield.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -251,6 +251,19 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                                       },
                                     ),
                                   ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: FormTextField(
+                                      label: "Issuing country",
+                                      controller: _cvcController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter an issuing country';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
                                   SaveCardButton(
                                     formKey: _formKey,
                                     cardNumberController: _cardNumberController,
@@ -313,7 +326,6 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       _customPaint = CustomPaint(painter: painter);
     } else {
       print('Recognized text:\n\n${recognizedText.text}');
-      // // TODO: set _customPaint to draw boundingRect on top of image
       _customPainter = TextRecognizerPainter(
         recognizedText,
         _imageSize!,

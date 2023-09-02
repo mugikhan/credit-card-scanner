@@ -1,4 +1,4 @@
-import 'package:flutter_card_scanner/card_issuer.dart';
+import 'package:flutter_card_scanner/models/card_issuer.dart';
 import 'package:isar/isar.dart';
 
 part 'credit_card.g.dart';

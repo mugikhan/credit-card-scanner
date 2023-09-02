@@ -25,7 +25,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  credit_card_scanner: ^1.0.5
   #Text recognition using tensorflow
   google_mlkit_text_recognition: ^0.10.0
   #Camera for scanning and taking pictures

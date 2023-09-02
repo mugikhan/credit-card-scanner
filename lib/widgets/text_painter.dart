@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_card_scanner/coords_translator.dart';
+import 'package:flutter_card_scanner/utils/coords_translator.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class TextRecognizerPainter extends CustomPainter {

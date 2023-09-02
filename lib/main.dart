@@ -2,7 +2,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_scanner/credit_cards_view.dart';
 import 'package:flutter_card_scanner/db/database.dart';
-import 'package:flutter_card_scanner/scanner_utils.dart';
 import 'package:flutter_card_scanner/services/custom_snackbar.dart';
 import 'package:flutter_card_scanner/text_recognizer_view.dart';
 
@@ -68,8 +67,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() async {
-    var camera = ScannerUtils.getCamera(CameraLensDirection.back);
-
     Navigator.of(context).pushNamed(
       'camera',
     );

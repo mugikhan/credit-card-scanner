@@ -1,3 +1,4 @@
+
 # Flutter credit card scanner
 
 A flutter mobile application for saving and storing credit card details. It also adds the ability to scan a card and autofill in the details required.
@@ -20,3 +21,7 @@ Chrome (web)             • chrome                    • web-javascript • Go
 --------------------
 3. flutter run -d "device name or id"
 ```
+
+# Builds
+
+You can find the latest builds for android in the `/build` directory.

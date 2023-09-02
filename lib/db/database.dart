@@ -1,3 +1,5 @@
+import 'package:flutter_card_scanner/countries/select_banned_countries.dart';
+import 'package:flutter_card_scanner/db/models/banned_countries.dart';
 import 'package:flutter_card_scanner/db/models/credit_card.dart';
 import 'package:flutter_card_scanner/models/exceptions.dart';
 import 'package:isar/isar.dart';
@@ -18,7 +20,7 @@ class DatabaseManager {
   Future<void> initDatabase() async {
     final dir = await getApplicationDocumentsDirectory();
     isar = await Isar.open(
-      [CreditCardSchema],
+      [CreditCardSchema, BannedCountrySchema],
       directory: dir.path,
     );
   }
@@ -38,8 +40,63 @@ class DatabaseManager {
     }
   }
 
+  Future<void> addBannedCountry(SelectCountry selectCountry) async {
+    try {
+      await isar.writeTxn(() async {
+        BannedCountry bannedCountry = BannedCountry()
+          ..country = selectCountry.country
+          ..selected = selectCountry.selected;
+        await isar.bannedCountrys.put(bannedCountry);
+      });
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  Future<void> removeBannedCountry(String country) async {
+    try {
+      await isar.writeTxn(() async {
+        await isar.bannedCountrys.deleteByCountry(country);
+      });
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  Future<void> saveBannedCountries(List<String> countries) async {
+    try {
+      for (var country in countries) {
+        BannedCountry? bannedCountry =
+            isar.bannedCountrys.getByCountrySync(country);
+        //Only insert if it doesn't exist
+        await isar.writeTxn(() async {
+          if (bannedCountry == null) {
+            BannedCountry bannedCountry = BannedCountry()..country = country;
+            await isar.bannedCountrys.put(bannedCountry);
+          }
+        });
+      }
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  Future<List<BannedCountry>> getBannedCountries() async {
+    return await isar.bannedCountrys.where().findAll();
+  }
+
   Stream<List<CreditCard>> watchAllCreditCards() async* {
     final query = isar.creditCards.where().build();
+
+    await for (final results in query.watch(fireImmediately: true)) {
+      if (results.isNotEmpty) {
+        yield results;
+      }
+    }
+  }
+
+  Stream<List<BannedCountry>> watchBannedCountries() async* {
+    final query = isar.bannedCountrys.where().build();
 
     await for (final results in query.watch(fireImmediately: true)) {
       if (results.isNotEmpty) {

@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_scanner/camera_view.dart';
 import 'package:flutter_card_scanner/models/card_details.dart';
-import 'package:flutter_card_scanner/text_painter.dart';
+import 'package:flutter_card_scanner/widgets/text_painter.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:collection/collection.dart';
 

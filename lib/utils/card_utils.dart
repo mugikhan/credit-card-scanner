@@ -1,4 +1,4 @@
-import 'package:flutter_card_scanner/card_issuer.dart';
+import 'package:flutter_card_scanner/models/card_issuer.dart';
 
 class CardUtils {
   //Mastercard numbers start with 51-59 followed by 14 digits

@@ -1,4 +1,4 @@
-import 'package:flutter_card_scanner/card_utils.dart';
+import 'package:flutter_card_scanner/utils/card_utils.dart';
 
 class CardDetails {
   String _cardNumber = "";

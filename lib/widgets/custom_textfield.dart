@@ -1,31 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_card_scanner/theme/app_colors.dart';
 
 class FormTextField extends StatelessWidget {
   const FormTextField({
     Key? key,
-    required this.controller,
+    this.controller,
     this.validator,
     this.fillColor = Colors.white,
     required this.label,
     this.hintText,
+    this.onChanged,
+    this.onEditingComplete,
+    this.suffixIcon,
   }) : super(key: key);
 
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final String? Function(String?)? validator;
   final Color fillColor;
   final String? hintText;
   final String label;
+  final Function(String)? onChanged;
+  final Function()? onEditingComplete;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      onChanged: onChanged,
+      onEditingComplete: onEditingComplete,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(
-            color: Color(0xFFE3E5E5),
+            color: AppColor.fieldBorder,
             width: 1.0,
           ),
         ),
@@ -34,7 +43,7 @@ class FormTextField extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(
-            color: Color(0xFFE3E5E5),
+            color: AppColor.fieldBorder,
             width: 1.0,
           ),
         ),
@@ -54,7 +63,7 @@ class FormTextField extends StatelessWidget {
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE3E5E5), width: 1),
+          borderSide: const BorderSide(color: AppColor.fieldBorder, width: 1),
         ),
         labelText: label,
         labelStyle: const TextStyle(
@@ -68,6 +77,7 @@ class FormTextField extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
         hintText: hintText,
+        suffixIcon: suffixIcon,
       ),
       validator: validator,
     );
