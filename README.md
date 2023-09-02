@@ -1,17 +1,22 @@
-# flutter_card_scanner
+# Flutter credit card scanner
 
-A new Flutter project.
+A flutter mobile application for saving and storing credit card details. It also adds the ability to scan a card and autofill in the details required.
 
-## Getting Started
+## Generate database models
+```dart
+flutter pub run build_runner build --delete-conflicting-outputs
+```
 
-This project is a starting point for a Flutter application.
+# Run the app locally
+```dart
+1. flutter pub run build_runner build --delete-conflicting-outputs
+2. flutter devices
+--------------------
+3 connected devices:
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# credit-card-scanner
+Mughees’ iPhone (mobile) • 00008110-0009301E0252801E • ios            • iOS 16.6 20G75
+macOS (desktop)          • macos                     • darwin-arm64   • macOS 13.0 22A8380 darwin-arm64
+Chrome (web)             • chrome                    • web-javascript • Google Chrome 116.0.5845.140
+--------------------
+3. flutter run -d "device name or id"
+```
