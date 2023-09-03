@@ -48,6 +48,12 @@ class DatabaseManager {
     }
   }
 
+  void removeCard(CreditCard creditCard) {
+    isar.writeTxnSync(() {
+      isar.creditCards.deleteByCardNumberSync(creditCard.cardNumber);
+    });
+  }
+
   void addBannedCountry(String country) {
     try {
       BannedCountry? bannedCountry =

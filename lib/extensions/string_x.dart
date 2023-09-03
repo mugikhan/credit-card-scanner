@@ -8,4 +8,6 @@ extension StringX on String {
   DateTime get fromDMYYtoDateTime => DateFormat("d/M/yy").parse(this);
 
   String get twoDigitYear => substring(2, length);
+
+  String get last4Digits => substring(length - 4);
 }

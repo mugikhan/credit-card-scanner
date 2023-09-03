@@ -50,6 +50,8 @@ class _CameraViewState extends State<CameraView> {
 
   FlashMode _flashMode = FlashMode.off;
 
+  bool _takingPhoto = false;
+
   @override
   void initState() {
     super.initState();
@@ -194,26 +196,32 @@ class _CameraViewState extends State<CameraView> {
                 },
               ),
             ),
-            CustomPhotoButton(
-              innerColor: Colors.white,
-              innerShape: BoxShape.circle,
-              onTap: () async {
-                final image = await _controller?.takePicture();
+            IgnorePointer(
+              ignoring: _takingPhoto,
+              child: CustomPhotoButton(
+                innerColor: Colors.white,
+                innerShape: BoxShape.circle,
+                onTap: () async {
+                  setState(() => _takingPhoto = true);
+                  final image = await _controller?.takePicture();
 
-                if (!mounted) return;
+                  if (!mounted) return;
 
-                if (context.mounted && image != null) {
-                  await Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => CaptureCardView(
-                        imagePath: image.path,
-                        imageRotation: imageRotation,
+                  setState(() => _takingPhoto = false);
+
+                  if (context.mounted && image != null) {
+                    await Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => CaptureCardView(
+                          imagePath: image.path,
+                          imageRotation: imageRotation,
+                        ),
                       ),
-                    ),
-                    (Route<dynamic> route) => false,
-                  );
-                }
-              },
+                      (Route<dynamic> route) => false,
+                    );
+                  }
+                },
+              ),
             ),
             RotatedBox(
               quarterTurns: turns,

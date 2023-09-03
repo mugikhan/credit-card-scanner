@@ -36,7 +36,10 @@ class _CreditCardsViewState extends State<CreditCardsView> {
                           const Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 8.0, vertical: 4.0),
-                            child: Text("Tap the cards to see the CVV code"),
+                            child: Text(
+                              "Tap the cards to see the CVV code\nLong press a credit card to remove it.",
+                              style: TextStyle(fontSize: 16, height: 1.4),
+                            ),
                           ),
                           Expanded(
                             child: ListView.builder(
@@ -207,6 +210,56 @@ class _CreditCardBuilderState extends State<CreditCardBuilder> {
         setState(() {
           _displayFront = !_displayFront;
         });
+      },
+      onLongPress: () {
+        showModalBottomSheet<void>(
+          context: context,
+          useSafeArea: true,
+          builder: (BuildContext context) {
+            return SizedBox(
+              height: 200,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          'Edit ${widget.creditCard.cardType.cardIssuerName} ${widget.creditCard.cardNumber!.last4Digits}',
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  InkWell(
+                    onTap: () {
+                      DatabaseManager().removeCard(widget.creditCard);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            'Remove',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       },
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 700),
