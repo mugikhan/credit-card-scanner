@@ -84,6 +84,7 @@ class FormTextField extends StatelessWidget {
       ),
       validator: validator,
       maxLength: maxLength,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
     );
   }
 }

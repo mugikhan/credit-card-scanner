@@ -32,6 +32,11 @@ class _CreditCardsViewState extends State<CreditCardsView> {
                   children: [
                     Column(
                       children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 4.0),
+                          child: Text("Tap the cards to see the CVC/CVV code"),
+                        ),
                         Expanded(
                           child: ListView.builder(
                             shrinkWrap: true,
@@ -119,38 +124,16 @@ class _CreditCardsViewState extends State<CreditCardsView> {
   }
 
   Widget _actionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ElevatedButton.icon(
-          onPressed: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const TextRecognizerView(),
-              ),
-            );
-          },
-          style: ButtonStyle(
-            padding: const MaterialStatePropertyAll(EdgeInsets.all(12.0)),
-            maximumSize: const MaterialStatePropertyAll(
-              Size(200, 50),
-            ),
-            shape: MaterialStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-            ),
-          ),
-          icon: const Icon(Icons.camera_alt),
-          label: const Text("Add new card"),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: ElevatedButton.icon(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton.icon(
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const SelectBannedCountriesView(),
+                  builder: (context) => const TextRecognizerView(),
                 ),
               );
             },
@@ -165,11 +148,36 @@ class _CreditCardsViewState extends State<CreditCardsView> {
                 ),
               ),
             ),
-            icon: const Icon(Icons.add),
-            label: const Text("Banned countries"),
+            icon: const Icon(Icons.camera_alt),
+            label: const Text("Add new card"),
           ),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SelectBannedCountriesView(),
+                  ),
+                );
+              },
+              style: ButtonStyle(
+                padding: const MaterialStatePropertyAll(EdgeInsets.all(12.0)),
+                maximumSize: const MaterialStatePropertyAll(
+                  Size(200, 50),
+                ),
+                shape: MaterialStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+              ),
+              icon: const Icon(Icons.add),
+              label: const Text("Banned countries"),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -342,7 +350,7 @@ class _CreditCardBuilderState extends State<CreditCardBuilder> {
           cardTypePath = "assets/visa.png";
           break;
         case CardIssuer.mastercard:
-          cardTypePath = "assets/mastercard.png";
+          cardTypePath = "assets/master_card.png";
           break;
         case CardIssuer.unknown:
           break;

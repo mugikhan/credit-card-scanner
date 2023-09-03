@@ -53,6 +53,8 @@ class _CaptureCardViewState extends State<CaptureCardView> {
 
   String _issuingCountry = "";
 
+  CardIssuer _cardIssuer = CardIssuer.unknown;
+
   List<String> _months = [
     "01",
     "02",
@@ -90,7 +92,7 @@ class _CaptureCardViewState extends State<CaptureCardView> {
   void initState() {
     super.initState();
     _years = _getYearsFrom99();
-    //Update with default date
+    //Update with default values
     _updateExpiryDate(_expiryMonth, _expiryYear);
 
     _cardNumberController.addListener(_updateCreditCardNumber);
@@ -115,6 +117,11 @@ class _CaptureCardViewState extends State<CaptureCardView> {
   void _updateCreditCardNumber() {
     if (_cardNumberController.text.isNotEmpty) {
       _creditCard.cardNumber = _cardNumberController.text;
+      setState(() {
+        CardIssuer cardType =
+            CardUtils.getCardIssuer(_cardNumberController.text);
+        _updateCardIssuer(cardType);
+      });
     }
   }
 
@@ -122,6 +129,13 @@ class _CaptureCardViewState extends State<CaptureCardView> {
     if (_cardholderController.text.isNotEmpty) {
       _creditCard.cardHolderName = _cardholderController.text;
     }
+  }
+
+  void _updateCardIssuer(CardIssuer cardIssuer) {
+    _creditCard.cardType = cardIssuer;
+    setState(() {
+      _cardIssuer = cardIssuer;
+    });
   }
 
   void _updateExpiryDate(String month, int year) {
@@ -147,6 +161,11 @@ class _CaptureCardViewState extends State<CaptureCardView> {
                   children: [
                     CreditCardBuilder(
                       creditCard: _creditCard,
+                    ),
+                    const Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      child: Text("Tap the card to see the CVC/CVV code"),
                     ),
                     ElevatedButton.icon(
                       onPressed: () async {
@@ -201,6 +220,7 @@ class _CaptureCardViewState extends State<CaptureCardView> {
                                     },
                                   ),
                                 ),
+                                _cardTypeDropdown(),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: FormTextField(
@@ -250,6 +270,7 @@ class _CaptureCardViewState extends State<CaptureCardView> {
                                   month: _expiryMonth,
                                   year: _expiryYear,
                                   issuingCountry: _issuingCountry,
+                                  cardIssuer: _cardIssuer,
                                 ),
                               ],
                             ),
@@ -267,6 +288,40 @@ class _CaptureCardViewState extends State<CaptureCardView> {
                 child: CircularProgressIndicator(),
               ),
             ),
+    );
+  }
+
+  Widget _cardTypeDropdown() {
+    return Flexible(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FormDropdownField<CardIssuer>(
+            label: "Card type",
+            value: _cardIssuer,
+            items: CardIssuer.values.map((issuer) {
+              return DropdownMenuItem(
+                value: issuer,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        issuer.cardIssuerName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+            onChanged: (CardIssuer? value) {
+              _updateCardIssuer(value!);
+            }),
+      ),
     );
   }
 
@@ -424,6 +479,9 @@ class _CaptureCardViewState extends State<CaptureCardView> {
       if (creditCardNumber != null) {
         _cardNumberController.text = creditCardNumber;
         _creditCard.cardNumber = creditCardNumber;
+        //Get card type from card num
+        CardIssuer cardIssuer = CardUtils.getCardIssuer(creditCardNumber);
+        _cardIssuer = cardIssuer;
       }
       if (name != null) {
         _cardholderController.text = name;
@@ -432,12 +490,14 @@ class _CaptureCardViewState extends State<CaptureCardView> {
       if (expiryDateString != null && expiryDateString.length == 5) {
         String month = expiryDateString.monthFromExpiry;
         String year = expiryDateString.yearFromExpiry;
-        String tempDate = "01/$month/$year";
-        DateTime formattedDate = tempDate.fromDMYYtoDateTime;
-        _expiryMonth = month;
-        _expiryYear = formattedDate.year;
-        _creditCard.expiryMonth = month;
-        _creditCard.expiryYear = formattedDate.year;
+        if (int.tryParse(month) != null) {
+          String tempDate = "01/$month/$year";
+          DateTime formattedDate = tempDate.fromDMYYtoDateTime;
+          _expiryMonth = month;
+          _expiryYear = formattedDate.year;
+          _creditCard.expiryMonth = month;
+          _creditCard.expiryYear = formattedDate.year;
+        }
       }
       if (cvc != null && cvc.length == 3) {
         _cvcController.text = cvc;
@@ -533,6 +593,7 @@ class SaveCardButton extends StatelessWidget {
     required this.month,
     required this.year,
     required this.issuingCountry,
+    required this.cardIssuer,
   }) : super(key: key);
 
   final GlobalKey<FormState> formKey;
@@ -542,6 +603,7 @@ class SaveCardButton extends StatelessWidget {
   final String month;
   final int year;
   final String issuingCountry;
+  final CardIssuer cardIssuer;
 
   @override
   Widget build(BuildContext context) {
@@ -551,7 +613,6 @@ class SaveCardButton extends StatelessWidget {
           String creditCardNumber = cardNumberController.text;
           String name = cardHolderController.text;
           String cvc = cvcController.text;
-          CardIssuer cardIssuer = CardUtils.getCardIssuer(creditCardNumber);
           CreditCard creditCard = CreditCard()
             ..cardNumber = creditCardNumber
             ..cardHolderName = name
@@ -563,11 +624,13 @@ class SaveCardButton extends StatelessWidget {
           try {
             await DatabaseManager().saveCardDetails(creditCard);
 
-            await Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const CreditCardsView(),
-              ),
-            );
+            if (context.mounted) {
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const CreditCardsView(),
+                ),
+              );
+            }
           } on ItemExistsException {
             CustomSnackbarService()
                 .showErrorSnackbar("This card has already been saved.");
