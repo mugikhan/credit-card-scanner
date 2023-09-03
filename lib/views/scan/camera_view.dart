@@ -4,6 +4,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_card_scanner/views/credit_cards/capture_card_view.dart';
+import 'package:flutter_card_scanner/widgets/circle_num_button.dart';
+import 'package:flutter_card_scanner/widgets/take_photo_button.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class CameraView extends StatefulWidget {
@@ -45,6 +47,8 @@ class _CameraViewState extends State<CameraView> {
   double y = 0;
 
   InputImageRotation imageRotation = InputImageRotation.rotation0deg;
+
+  FlashMode _flashMode = FlashMode.off;
 
   @override
   void initState() {
@@ -102,13 +106,195 @@ class _CameraViewState extends State<CameraView> {
                       child: widget.customPaint,
                     ),
             ),
-            _backButton(),
-            _switchLiveCameraToggle(),
-            _takePictureButton(context),
-            _zoomControl(),
-            _exposureControl(),
+            OrientationBuilder(
+              builder: (context, orientation) {
+                switch (orientation) {
+                  case Orientation.portrait:
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        RotatedBox(
+                          quarterTurns: 0,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              _controlBar(
+                                turns: 0,
+                              ),
+                              _pageText()
+                            ],
+                          ),
+                        )
+                      ],
+                    );
+                  case Orientation.landscape:
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        RotatedBox(
+                          quarterTurns: -1,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              _controlBar(
+                                turns: 1,
+                              ),
+                              _pageText()
+                            ],
+                          ),
+                        )
+                      ],
+                    );
+                }
+              },
+            ),
+            if (showFocusCircle)
+              Positioned(
+                  top: y - 20,
+                  left: x - 20,
+                  child: Container(
+                    height: 60,
+                    width: 60,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5)),
+                  ))
+            // _backButton(),
+            // _switchLiveCameraToggle(),
+            // _takePictureButton(context),
+            // _zoomControl(),
+            // _exposureControl(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _controlBar({required int turns}) {
+    return Column(
+      children: [
+        _zoomControlBar(turns: turns),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            RotatedBox(
+              quarterTurns: turns,
+              child: IconButton(
+                color: Colors.white,
+                icon: _flashMode == FlashMode.always
+                    ? const Icon(Icons.flash_on)
+                    : const Icon(Icons.flash_off),
+                onPressed: () {
+                  setState(() {
+                    if (_flashMode == FlashMode.off) {
+                      _flashMode = FlashMode.always;
+                    } else {
+                      _flashMode = FlashMode.off;
+                    }
+                  });
+                  _controller?.setFlashMode(_flashMode);
+                },
+              ),
+            ),
+            CustomPhotoButton(
+              innerColor: Colors.white,
+              innerShape: BoxShape.circle,
+              onTap: () async {
+                final image = await _controller?.takePicture();
+
+                if (!mounted) return;
+
+                if (context.mounted && image != null) {
+                  await Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => CaptureCardView(
+                        imagePath: image.path,
+                        imageRotation: imageRotation,
+                      ),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+                }
+              },
+            ),
+            RotatedBox(
+              quarterTurns: turns,
+              child: IconButton(
+                color: Colors.white,
+                icon: const Icon(Icons.switch_camera),
+                onPressed: _switchLiveCamera, //onNewCameraSelected(),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _zoomControlBar({required int turns}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          RotatedBox(
+            quarterTurns: turns,
+            child: CircleNumButton(
+              onTap: () async {
+                setState(() {
+                  _currentZoomLevel = 1.0;
+                });
+                await _controller?.setZoomLevel(1.0);
+              },
+              text: "1x",
+              isSelected: _currentZoomLevel == 1.0,
+            ),
+          ),
+          RotatedBox(
+            quarterTurns: turns,
+            child: CircleNumButton(
+              onTap: () async {
+                setState(() {
+                  _currentZoomLevel = 2.0;
+                });
+                await _controller?.setZoomLevel(2.0);
+              },
+              text: "2x",
+              isSelected: _currentZoomLevel == 2.0,
+            ),
+          ),
+          RotatedBox(
+            quarterTurns: turns,
+            child: CircleNumButton(
+              onTap: () async {
+                setState(() {
+                  _currentZoomLevel = 3.0;
+                });
+                await _controller?.setZoomLevel(3.0);
+              },
+              text: "3x",
+              isSelected: _currentZoomLevel == 3.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pageText() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: const [
+          AnimatedDefaultTextStyle(
+            duration: Duration(milliseconds: 500),
+            style: TextStyle(color: Colors.white),
+            child: Text("PHOTO"),
+          ),
+        ],
       ),
     );
   }
@@ -116,7 +302,9 @@ class _CameraViewState extends State<CameraView> {
   Future<void> _onTap(TapUpDetails details) async {
     if (_controller?.value.isInitialized != null &&
         _controller!.value.isInitialized) {
-      showFocusCircle = true;
+      setState(() {
+        showFocusCircle = true;
+      });
       x = details.localPosition.dx;
       y = details.localPosition.dy;
 
@@ -133,7 +321,7 @@ class _CameraViewState extends State<CameraView> {
       await _controller?.setFocusPoint(point);
 
       // Manually set light exposure
-      //controller.setExposurePoint(point);
+      _controller?.setExposurePoint(point);
 
       setState(() {
         Future.delayed(const Duration(seconds: 2)).whenComplete(() {
@@ -143,60 +331,6 @@ class _CameraViewState extends State<CameraView> {
         });
       });
     }
-  }
-
-  Widget _backButton() => Positioned(
-        top: 40,
-        left: 8,
-        child: SizedBox(
-          height: 50.0,
-          width: 50.0,
-          child: FloatingActionButton(
-            heroTag: Object(),
-            onPressed: () => Navigator.of(context).pop(),
-            backgroundColor: Colors.black54,
-            child: const Icon(
-              Icons.arrow_back_ios_outlined,
-              size: 20,
-            ),
-          ),
-        ),
-      );
-
-  Widget _takePictureButton(BuildContext context) {
-    return Positioned(
-      bottom: 8,
-      left: 8,
-      child: SizedBox(
-        height: 50.0,
-        width: 50.0,
-        child: FloatingActionButton(
-          heroTag: UniqueKey(),
-          onPressed: () async {
-            final image = await _controller?.takePicture();
-
-            if (!mounted) return;
-
-            if (context.mounted && image != null) {
-              await Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                  builder: (context) => CaptureCardView(
-                    imagePath: image.path,
-                    imageRotation: imageRotation,
-                  ),
-                ),
-                (Route<dynamic> route) => false,
-              );
-            }
-          },
-          backgroundColor: Colors.black54,
-          child: const Icon(
-            Icons.photo_camera_sharp,
-            size: 25,
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _switchLiveCameraToggle() => Positioned(
@@ -366,7 +500,11 @@ class _CameraViewState extends State<CameraView> {
 
   Future _switchLiveCamera() async {
     setState(() => _changingCameraLens = true);
-    _cameraIndex = (_cameraIndex + 1) % _cameras.length;
+    if (_cameraIndex == 0) {
+      _cameraIndex = 1;
+    } else if (_cameraIndex == 1) {
+      _cameraIndex = 0;
+    }
 
     await _stopLiveFeed();
     await _startLiveFeed();

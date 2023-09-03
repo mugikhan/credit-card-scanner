@@ -28,21 +28,22 @@ class _TextRecognizerViewState extends State<TextRecognizerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan your card'),
-        centerTitle: true,
-      ),
-      body: Stack(children: [
-        CameraView(
-          customPaint: _customPaint,
-          onImage: _processImage,
-          // onCameraFeedReady: widget.onCameraFeedReady,
-          // onDetectorViewModeChanged: _onDetectorViewModeChanged,
-          initialCameraLensDirection: _cameraLensDirection,
-          onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Scan your card'),
+          centerTitle: true,
         ),
-      ]),
+        body: Stack(children: [
+          CameraView(
+            customPaint: _customPaint,
+            onImage: _processImage,
+            initialCameraLensDirection: _cameraLensDirection,
+            onCameraLensDirectionChanged: (value) =>
+                _cameraLensDirection = value,
+          ),
+        ]),
+      ),
     );
   }
 

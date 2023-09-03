@@ -7,6 +7,8 @@ class AppColor {
 
   static const Color fieldBorder = Color(0xFFE3E5E5);
 
+  static const Color zoomFill = Color.fromARGB(200, 63, 64, 64);
+
   //Snackbar background and text colors
   static const Color success = Color(0xFF50B848);
   static const Color onSuccess = Color(0xFFFFFFFF);

@@ -19,80 +19,83 @@ class CreditCardsView extends StatefulWidget {
 class _CreditCardsViewState extends State<CreditCardsView> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('View credit cards')),
-      body: StreamBuilder<List<CreditCard>>(
-          stream: DatabaseManager().watchAllCreditCards(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.active &&
-                snapshot.hasData) {
-              List<CreditCard> creditCards = snapshot.data!;
-              if (creditCards.isNotEmpty) {
-                return Stack(
-                  children: [
-                    Column(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 4.0),
-                          child: Text("Tap the cards to see the CVC/CVV code"),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: creditCards.length,
-                            itemBuilder: (context, index) {
-                              CreditCard creditCard = creditCards[index];
-                              return CreditCardBuilder(
-                                creditCard: creditCard,
-                              );
-                            },
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('View credit cards')),
+        body: StreamBuilder<List<CreditCard>>(
+            stream: DatabaseManager().watchAllCreditCards(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.active &&
+                  snapshot.hasData) {
+                List<CreditCard> creditCards = snapshot.data!;
+                if (creditCards.isNotEmpty) {
+                  return Stack(
+                    children: [
+                      Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 4.0),
+                            child:
+                                Text("Tap the cards to see the CVC/CVV code"),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 60,
-                        )
-                      ],
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 2,
-                              offset: const Offset(
-                                  0, -1), // changes position of shadow
+                          Expanded(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: creditCards.length,
+                              itemBuilder: (context, index) {
+                                CreditCard creditCard = creditCards[index];
+                                return CreditCardBuilder(
+                                  creditCard: creditCard,
+                                );
+                              },
                             ),
-                          ],
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(8.0),
-                            topRight: Radius.circular(8.0),
                           ),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: _actionButtons(),
+                          const SizedBox(
+                            height: 60,
+                          )
+                        ],
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                                offset: const Offset(
+                                    0, -1), // changes position of shadow
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(8.0),
+                              topRight: Radius.circular(8.0),
+                            ),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: _actionButtons(),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return _noCardsLayout();
+                }
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
                 );
-              } else {
-                return _noCardsLayout();
               }
-            } else if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }),
+            }),
+      ),
     );
   }
 

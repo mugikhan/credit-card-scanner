@@ -151,11 +151,11 @@ class _CaptureCardViewState extends State<CaptureCardView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Display the Picture')),
-      body: _imageSize != null
-          ? SafeArea(
-              child: SingleChildScrollView(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Display the Picture')),
+        body: _imageSize != null
+            ? SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -280,14 +280,14 @@ class _CaptureCardViewState extends State<CaptureCardView> {
                     ),
                   ],
                 ),
+              )
+            : Container(
+                color: Colors.black,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
               ),
-            )
-          : Container(
-              color: Colors.black,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+      ),
     );
   }
 
