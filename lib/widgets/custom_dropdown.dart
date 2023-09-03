@@ -18,7 +18,7 @@ class FormDropdownField<T> extends StatelessWidget {
   final String label;
   final List<DropdownMenuItem<T>>? items;
   final ValueChanged<T?>? onChanged;
-  final T value;
+  final T? value;
 
   @override
   Widget build(BuildContext context) {

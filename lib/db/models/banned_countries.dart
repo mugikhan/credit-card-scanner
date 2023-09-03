@@ -8,6 +8,4 @@ class BannedCountry {
 
   @Index(unique: true)
   late String country;
-
-  late bool selected;
 }

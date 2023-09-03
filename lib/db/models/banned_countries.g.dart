@@ -21,11 +21,6 @@ const BannedCountrySchema = CollectionSchema(
       id: 0,
       name: r'country',
       type: IsarType.string,
-    ),
-    r'selected': PropertySchema(
-      id: 1,
-      name: r'selected',
-      type: IsarType.bool,
     )
   },
   estimateSize: _bannedCountryEstimateSize,
@@ -73,7 +68,6 @@ void _bannedCountrySerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.country);
-  writer.writeBool(offsets[1], object.selected);
 }
 
 BannedCountry _bannedCountryDeserialize(
@@ -85,7 +79,6 @@ BannedCountry _bannedCountryDeserialize(
   final object = BannedCountry();
   object.country = reader.readString(offsets[0]);
   object.id = id;
-  object.selected = reader.readBool(offsets[1]);
   return object;
 }
 
@@ -98,8 +91,6 @@ P _bannedCountryDeserializeProp<P>(
   switch (propertyId) {
     case 0:
       return (reader.readString(offset)) as P;
-    case 1:
-      return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -490,16 +481,6 @@ extension BannedCountryQueryFilter
       ));
     });
   }
-
-  QueryBuilder<BannedCountry, BannedCountry, QAfterFilterCondition>
-      selectedEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'selected',
-        value: value,
-      ));
-    });
-  }
 }
 
 extension BannedCountryQueryObject
@@ -519,19 +500,6 @@ extension BannedCountryQuerySortBy
   QueryBuilder<BannedCountry, BannedCountry, QAfterSortBy> sortByCountryDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'country', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BannedCountry, BannedCountry, QAfterSortBy> sortBySelected() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'selected', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BannedCountry, BannedCountry, QAfterSortBy>
-      sortBySelectedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'selected', Sort.desc);
     });
   }
 }
@@ -561,19 +529,6 @@ extension BannedCountryQuerySortThenBy
       return query.addSortBy(r'id', Sort.desc);
     });
   }
-
-  QueryBuilder<BannedCountry, BannedCountry, QAfterSortBy> thenBySelected() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'selected', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BannedCountry, BannedCountry, QAfterSortBy>
-      thenBySelectedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'selected', Sort.desc);
-    });
-  }
 }
 
 extension BannedCountryQueryWhereDistinct
@@ -582,12 +537,6 @@ extension BannedCountryQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'country', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<BannedCountry, BannedCountry, QDistinct> distinctBySelected() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'selected');
     });
   }
 }
@@ -603,12 +552,6 @@ extension BannedCountryQueryProperty
   QueryBuilder<BannedCountry, String, QQueryOperations> countryProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'country');
-    });
-  }
-
-  QueryBuilder<BannedCountry, bool, QQueryOperations> selectedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'selected');
     });
   }
 }

@@ -16,6 +16,8 @@ class CreditCard {
 
   String? cvc;
 
+  String? issuingCountry;
+
   @Enumerated(EnumType.value, 'cardIssuerName')
   CardIssuer cardType = CardIssuer.unknown;
 }

@@ -14,47 +14,22 @@ class SelectBannedCountriesView extends StatefulWidget {
 }
 
 class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
-  List<String> _bannedCountries = [];
+  List<String> _searchResults = [];
 
-  List<SelectCountry> _searchResults = [];
-
-  List<SelectCountry> _countries = [];
-
-  List<SelectCountry> _selectedCountries = [];
+  List<String> _allCountries = [];
 
   final _searchController = TextEditingController();
-  Future<List<BannedCountry>> getBannedCountries =
-      DatabaseManager().getBannedCountries();
 
   @override
   void initState() {
     super.initState();
 
-    DatabaseManager().getBannedCountries().then((value) {
-      for (var bannedCountry in value) {
-        var selectedCountry = SelectCountry.fromBannedCountry(bannedCountry);
-        _selectedCountries.add(selectedCountry);
-      }
-      for (var country in countries) {
-        _countries.add(SelectCountry(
-          country: country,
-          selected:
-              _selectedCountries.any((element) => element.country == country),
-        ));
-      }
-    });
+    _allCountries.addAll(countries);
   }
 
-  void selectCountry(SelectCountry selectCountry) {
+  void addCountry(String country) {
     setState(() {
-      selectCountry.selected = !selectCountry.selected;
-      if (selectCountry.selected) {
-        DatabaseManager().addBannedCountry(selectCountry);
-        // _selectedCountries.add(selectCountry);
-      } else {
-        removeCountry(selectCountry.country);
-        // _selectedCountries.remove(selectCountry);
-      }
+      DatabaseManager().addBannedCountry(country);
     });
   }
 
@@ -80,26 +55,31 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
                   onChanged: (String? value) {
                     _searchResults.clear();
                     if (value != null && value.length > 3) {
-                      for (var selectCountry in _countries) {
-                        if (selectCountry.country
+                      for (var country in _allCountries) {
+                        if (country
                             .toLowerCase()
                             .contains(value.toLowerCase())) {
-                          _searchResults.add(selectCountry);
+                          _searchResults.add(country);
                         }
                       }
                     }
                     setState(() {});
                   },
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear),
-                    color: Colors.black,
-                    onPressed: () {
-                      setState(() {
-                        _searchResults.clear();
-                        _searchController.clear();
-                      });
-                    },
-                  ),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          color: Colors.black,
+                          onPressed: () {
+                            setState(() {
+                              _searchResults.clear();
+                              _searchController.clear();
+                            });
+                          },
+                        )
+                      : const SizedBox(
+                          width: 0,
+                          height: 0,
+                        ),
                 ),
               ),
               Expanded(
@@ -119,26 +99,32 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
                             Expanded(
                               child: _searchResults.isEmpty
                                   ? ListView.builder(
+                                      key: const PageStorageKey(0),
                                       shrinkWrap: true,
-                                      itemCount: _countries.length,
+                                      itemCount: _allCountries.length,
                                       itemBuilder: (context, index) {
-                                        SelectCountry country =
-                                            _countries[index];
+                                        String country = _allCountries[index];
                                         return CountryItem(
                                           country: country,
-                                          selectCountry: selectCountry,
+                                          addCountry: addCountry,
+                                          selected: bannedCountries.any(
+                                              (element) =>
+                                                  element.country == country),
                                         );
                                       },
                                     )
                                   : ListView.builder(
+                                      key: const PageStorageKey(1),
                                       shrinkWrap: true,
                                       itemCount: _searchResults.length,
                                       itemBuilder: (context, index) {
-                                        SelectCountry country =
-                                            _searchResults[index];
+                                        String country = _searchResults[index];
                                         return CountryItem(
                                           country: country,
-                                          selectCountry: selectCountry,
+                                          addCountry: addCountry,
+                                          selected: bannedCountries.any(
+                                              (element) =>
+                                                  element.country == country),
                                         );
                                       },
                                     ),
@@ -146,20 +132,11 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
                           ],
                         );
                       }
-                      return Container();
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
                     }),
               ),
-              ElevatedButton(
-                onPressed: () async {
-                  await DatabaseManager().saveBannedCountries(countries);
-                },
-                child: const Text(
-                  'Save',
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
-              )
             ],
           )),
     );
@@ -186,7 +163,7 @@ class BannedCountriesChips extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Text("Selected countries"),
+          const Text("Banned countries"),
           Wrap(
             children: bannedCountries
                 .map((bannedCountry) => Padding(
@@ -207,37 +184,33 @@ class BannedCountriesChips extends StatelessWidget {
   }
 }
 
-class CountryItem extends StatefulWidget {
+class CountryItem extends StatelessWidget {
   const CountryItem({
     super.key,
     required this.country,
-    required this.selectCountry,
+    required this.addCountry,
+    this.selected = false,
   });
 
-  final SelectCountry country;
-  final Function(SelectCountry) selectCountry;
-
-  @override
-  State<CountryItem> createState() => _CountryItemState();
-}
-
-class _CountryItemState extends State<CountryItem> {
-  @override
-  void initState() {
-    super.initState();
-  }
+  final String country;
+  final Function(String) addCountry;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: CustomCheckbox(
-        value: widget.country.selected,
-      ),
-      title: Text(widget.country.country),
-      onTap: () {
-        widget.selectCountry.call(widget.country);
-      },
-    );
+    return StreamBuilder<void>(
+        stream: DatabaseManager().watchCollection(),
+        builder: (context, snapshot) {
+          return ListTile(
+            leading: CustomCheckbox(
+              value: selected,
+            ),
+            title: Text(country),
+            onTap: () {
+              addCountry.call(country);
+            },
+          );
+        });
   }
 }
 

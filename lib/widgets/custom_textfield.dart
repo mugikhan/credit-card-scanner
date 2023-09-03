@@ -12,6 +12,7 @@ class FormTextField extends StatelessWidget {
     this.onChanged,
     this.onEditingComplete,
     this.suffixIcon,
+    this.maxLength,
   }) : super(key: key);
 
   final TextEditingController? controller;
@@ -22,6 +23,7 @@ class FormTextField extends StatelessWidget {
   final Function(String)? onChanged;
   final Function()? onEditingComplete;
   final Widget? suffixIcon;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +80,10 @@ class FormTextField extends StatelessWidget {
         ),
         hintText: hintText,
         suffixIcon: suffixIcon,
+        counterText: "",
       ),
       validator: validator,
+      maxLength: maxLength,
     );
   }
 }

@@ -1,4 +1,6 @@
-import 'package:flutter_card_scanner/countries/select_banned_countries.dart';
+import 'dart:async';
+
+import 'package:flutter_card_scanner/views/countries/select_banned_countries.dart';
 import 'package:flutter_card_scanner/db/models/banned_countries.dart';
 import 'package:flutter_card_scanner/db/models/credit_card.dart';
 import 'package:flutter_card_scanner/models/exceptions.dart';
@@ -10,6 +12,12 @@ class DatabaseManager {
   static final DatabaseManager _instance = DatabaseManager._internal();
 
   late Isar isar;
+
+  final StreamController<List<BannedCountry>> _bannedCountriesController =
+      StreamController<List<BannedCountry>>.broadcast();
+
+  Stream<List<BannedCountry>> get onCountryAdded =>
+      _bannedCountriesController.stream;
 
   factory DatabaseManager() {
     return _instance;
@@ -40,42 +48,30 @@ class DatabaseManager {
     }
   }
 
-  Future<void> addBannedCountry(SelectCountry selectCountry) async {
+  void addBannedCountry(String country) {
     try {
-      await isar.writeTxn(() async {
-        BannedCountry bannedCountry = BannedCountry()
-          ..country = selectCountry.country
-          ..selected = selectCountry.selected;
-        await isar.bannedCountrys.put(bannedCountry);
-      });
-    } catch (_) {
-      rethrow;
-    }
-  }
-
-  Future<void> removeBannedCountry(String country) async {
-    try {
-      await isar.writeTxn(() async {
-        await isar.bannedCountrys.deleteByCountry(country);
-      });
-    } catch (_) {
-      rethrow;
-    }
-  }
-
-  Future<void> saveBannedCountries(List<String> countries) async {
-    try {
-      for (var country in countries) {
-        BannedCountry? bannedCountry =
-            isar.bannedCountrys.getByCountrySync(country);
-        //Only insert if it doesn't exist
-        await isar.writeTxn(() async {
-          if (bannedCountry == null) {
-            BannedCountry bannedCountry = BannedCountry()..country = country;
-            await isar.bannedCountrys.put(bannedCountry);
-          }
+      BannedCountry? bannedCountry =
+          isar.bannedCountrys.getByCountrySync(country);
+      if (bannedCountry == null) {
+        isar.writeTxnSync(() {
+          BannedCountry bannedCountry = BannedCountry()..country = country;
+          isar.bannedCountrys.putSync(bannedCountry);
+        });
+      } else {
+        isar.writeTxnSync(() {
+          isar.bannedCountrys.deleteByCountrySync(country);
         });
       }
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  void removeBannedCountry(String country) {
+    try {
+      isar.writeTxnSync(() {
+        isar.bannedCountrys.deleteByCountrySync(country);
+      });
     } catch (_) {
       rethrow;
     }
@@ -86,22 +82,14 @@ class DatabaseManager {
   }
 
   Stream<List<CreditCard>> watchAllCreditCards() async* {
-    final query = isar.creditCards.where().build();
+    yield* isar.creditCards.where().watch(fireImmediately: true);
+  }
 
-    await for (final results in query.watch(fireImmediately: true)) {
-      if (results.isNotEmpty) {
-        yield results;
-      }
-    }
+  Stream<void> watchCollection() async* {
+    yield* isar.bannedCountrys.watchLazy(fireImmediately: true);
   }
 
   Stream<List<BannedCountry>> watchBannedCountries() async* {
-    final query = isar.bannedCountrys.where().build();
-
-    await for (final results in query.watch(fireImmediately: true)) {
-      if (results.isNotEmpty) {
-        yield results;
-      }
-    }
+    yield* isar.bannedCountrys.where().watch(fireImmediately: true);
   }
 }

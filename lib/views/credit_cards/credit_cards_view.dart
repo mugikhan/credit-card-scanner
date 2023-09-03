@@ -1,14 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_card_scanner/countries/select_banned_countries.dart';
+import 'package:flutter_card_scanner/views/countries/select_banned_countries.dart';
 import 'package:flutter_card_scanner/models/card_issuer.dart';
 import 'package:flutter_card_scanner/db/database.dart';
 import 'package:flutter_card_scanner/db/models/credit_card.dart';
 import 'package:flutter_card_scanner/extensions/string_x.dart';
 import 'package:flutter_card_scanner/theme/app_colors.dart';
-import 'package:flutter_credit_card/credit_card_brand.dart';
-import 'package:flutter_credit_card/flutter_credit_card.dart';
+import 'package:flutter_card_scanner/views/scan/text_recognizer_view.dart';
 
 class CreditCardsView extends StatefulWidget {
   const CreditCardsView({super.key});
@@ -22,31 +21,67 @@ class _CreditCardsViewState extends State<CreditCardsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('View credit cards')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const SelectBannedCountriesView(),
-            ),
-          );
-        },
-        label: const Text('Countries'),
-        icon: const Icon(Icons.add),
-      ),
       body: StreamBuilder<List<CreditCard>>(
           stream: DatabaseManager().watchAllCreditCards(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.active &&
                 snapshot.hasData) {
               List<CreditCard> creditCards = snapshot.data!;
-              return ListView.builder(
-                itemCount: creditCards.length,
-                itemBuilder: (context, index) {
-                  CreditCard creditCard = creditCards[index];
-                  return CreditCardBuilder(
-                    creditCard: creditCard,
-                  );
-                },
+              if (creditCards.isNotEmpty) {
+                return Stack(
+                  children: [
+                    Column(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: creditCards.length,
+                            itemBuilder: (context, index) {
+                              CreditCard creditCard = creditCards[index];
+                              return CreditCardBuilder(
+                                creditCard: creditCard,
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 60,
+                        )
+                      ],
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 2,
+                              offset: const Offset(
+                                  0, -1), // changes position of shadow
+                            ),
+                          ],
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0),
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: _actionButtons(),
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                return _noCardsLayout();
+              }
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
               );
             }
             return const Center(
@@ -55,13 +90,95 @@ class _CreditCardsViewState extends State<CreditCardsView> {
           }),
     );
   }
+
+  Widget _noCardsLayout() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Spacer(),
+        const Text.rich(
+          TextSpan(
+              text: "You have no credit cards saved. Select the ",
+              children: [
+                TextSpan(
+                    text: "Add new card",
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                TextSpan(text: " button to add a credit card.")
+              ]),
+          style: TextStyle(
+            fontSize: 24,
+            height: 1.2,
+            color: Colors.black,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const Spacer(),
+        _actionButtons(),
+      ],
+    );
+  }
+
+  Widget _actionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const TextRecognizerView(),
+              ),
+            );
+          },
+          style: ButtonStyle(
+            padding: const MaterialStatePropertyAll(EdgeInsets.all(12.0)),
+            maximumSize: const MaterialStatePropertyAll(
+              Size(200, 50),
+            ),
+            shape: MaterialStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+            ),
+          ),
+          icon: const Icon(Icons.camera_alt),
+          label: const Text("Add new card"),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: ElevatedButton.icon(
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SelectBannedCountriesView(),
+                ),
+              );
+            },
+            style: ButtonStyle(
+              padding: const MaterialStatePropertyAll(EdgeInsets.all(12.0)),
+              maximumSize: const MaterialStatePropertyAll(
+                Size(200, 50),
+              ),
+              shape: MaterialStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text("Banned countries"),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class CreditCardBuilder extends StatefulWidget {
   const CreditCardBuilder({
     Key? key,
     required this.creditCard,
-  });
+  }) : super(key: key);
 
   final CreditCard creditCard;
 
@@ -134,7 +251,7 @@ class _CreditCardBuilderState extends State<CreditCardBuilder> {
             Padding(
               padding: const EdgeInsets.only(top: 16.0),
               child: Text(
-                widget.creditCard.cardNumber!,
+                widget.creditCard.cardNumber ?? "",
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 21,
@@ -146,12 +263,12 @@ class _CreditCardBuilderState extends State<CreditCardBuilder> {
               children: <Widget>[
                 _buildDetailsBlock(
                   label: 'CARDHOLDER',
-                  value: widget.creditCard.cardHolderName!,
+                  value: widget.creditCard.cardHolderName ?? "",
                 ),
                 _buildDetailsBlock(
                   label: 'VALID THRU',
                   value:
-                      "${widget.creditCard.expiryMonth!}/${widget.creditCard.expiryYear!.toString().twoDigitYear}",
+                      "${widget.creditCard.expiryMonth ?? ""}/${widget.creditCard.expiryYear?.toString().twoDigitYear ?? ""}",
                 ),
               ],
             ),
@@ -200,7 +317,7 @@ class _CreditCardBuilderState extends State<CreditCardBuilder> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      widget.creditCard.cvc!,
+                      widget.creditCard.cvc ?? "",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,

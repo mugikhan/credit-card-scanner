@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_card_scanner/display_image.dart';
+import 'package:flutter_card_scanner/views/credit_cards/capture_card_view.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class CameraView extends StatefulWidget {
@@ -163,40 +163,41 @@ class _CameraViewState extends State<CameraView> {
         ),
       );
 
-  Widget _takePictureButton(BuildContext context) => Positioned(
-        bottom: 8,
-        left: 8,
-        child: SizedBox(
-          height: 50.0,
-          width: 50.0,
-          child: FloatingActionButton(
-            heroTag: Object(),
-            onPressed: () async {
-              if (_controller != null) {
-                await _controller?.stopImageStream();
+  Widget _takePictureButton(BuildContext context) {
+    return Positioned(
+      bottom: 8,
+      left: 8,
+      child: SizedBox(
+        height: 50.0,
+        width: 50.0,
+        child: FloatingActionButton(
+          heroTag: UniqueKey(),
+          onPressed: () async {
+            final image = await _controller?.takePicture();
 
-                final image = await _controller!.takePicture();
+            if (!mounted) return;
 
-                if (!mounted) return;
-
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => DisplayPictureScreen(
-                      imagePath: image.path,
-                      imageRotation: imageRotation,
-                    ),
+            if (context.mounted && image != null) {
+              await Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => CaptureCardView(
+                    imagePath: image.path,
+                    imageRotation: imageRotation,
                   ),
-                );
-              }
-            },
-            backgroundColor: Colors.black54,
-            child: const Icon(
-              Icons.photo_camera_sharp,
-              size: 25,
-            ),
+                ),
+                (Route<dynamic> route) => false,
+              );
+            }
+          },
+          backgroundColor: Colors.black54,
+          child: const Icon(
+            Icons.photo_camera_sharp,
+            size: 25,
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget _switchLiveCameraToggle() => Positioned(
         bottom: 8,
@@ -394,8 +395,6 @@ class _CameraViewState extends State<CameraView> {
     // in both platforms `rotation` and `camera.lensDirection` can be used to compensate `x` and `y` coordinates on a canvas: https://github.com/flutter-ml/google_ml_kit_flutter/blob/master/packages/example/lib/vision_detector_views/painters/coordinates_translator.dart
     final camera = _cameras[_cameraIndex];
     final sensorOrientation = camera.sensorOrientation;
-    // print(
-    //     'lensDirection: ${camera.lensDirection}, sensorOrientation: $sensorOrientation, ${_controller?.value.deviceOrientation} ${_controller?.value.lockedCaptureOrientation} ${_controller?.value.isCaptureOrientationLocked}');
     InputImageRotation? rotation;
     if (Platform.isIOS) {
       rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
@@ -412,15 +411,12 @@ class _CameraViewState extends State<CameraView> {
             (sensorOrientation - rotationCompensation + 360) % 360;
       }
       rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
-      // print('rotationCompensation: $rotationCompensation');
     }
     if (rotation == null) return null;
     setState(() {
       imageRotation = rotation!;
     });
-    // print('final rotation: $rotation');
 
-    // get image format
     final format = InputImageFormatValue.fromRawValue(image.format.raw);
     // validate format depending on platform
     // only supported formats:
