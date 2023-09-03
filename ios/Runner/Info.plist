@@ -27,7 +27,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Flutter card scanner wants to use the camera.</string>
+	<string>Flutter card scanner needs access to the camera.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Flutter card scanner needs access to the microphone.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_scanner/models/exceptions.dart';
 import 'package:flutter_card_scanner/services/custom_snackbar.dart';
+import 'package:flutter_card_scanner/services/permissions_manager.dart';
 import 'package:flutter_card_scanner/views/countries/select_banned_countries.dart';
 import 'package:flutter_card_scanner/models/card_issuer.dart';
 import 'package:flutter_card_scanner/db/database.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_card_scanner/db/models/credit_card.dart';
 import 'package:flutter_card_scanner/extensions/string_x.dart';
 import 'package:flutter_card_scanner/theme/app_colors.dart';
 import 'package:flutter_card_scanner/views/scan/text_recognizer_view.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CreditCardsView extends StatefulWidget {
   const CreditCardsView({super.key});
@@ -138,11 +140,21 @@ class _CreditCardsViewState extends State<CreditCardsView> {
         children: [
           ElevatedButton.icon(
             onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const TextRecognizerView(),
-                ),
-              );
+              final isCameraPermissionGranted =
+                  await PermissionsManager().isCameraPermissionGranted();
+              if (isCameraPermissionGranted && context.mounted) {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const TextRecognizerView(),
+                  ),
+                );
+              } else {
+                CustomSnackbarService().showWarningSnackbar(
+                    "Please grant the app access to the camera");
+                Future.delayed(const Duration(milliseconds: 2200), () async {
+                  await openAppSettings();
+                });
+              }
             },
             style: ButtonStyle(
               padding: const MaterialStatePropertyAll(EdgeInsets.all(12.0)),
