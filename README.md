@@ -10,7 +10,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 # Run the app locally
 ```dart
-1. flutter pub run build_runner build --delete-conflicting-outputs
+1. flutter pub run build_runner build --delete-conflicting-outputs //Not required
 2. flutter devices
 --------------------
 4 connected devices:
