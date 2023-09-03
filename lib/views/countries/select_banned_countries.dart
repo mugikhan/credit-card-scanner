@@ -118,7 +118,7 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
                                 ),
                                 Expanded(
                                     child: Container(
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: Colors.white70,
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(16),
@@ -180,7 +180,7 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
 
   Future<bool?> _showMyDialog() async {
     var bannedCountries = await DatabaseManager().getBannedCountries();
-    if (context.mounted) {
+    if (context.mounted && bannedCountries.isNotEmpty) {
       return showDialog<bool>(
         context: context,
         barrierDismissible: true,
@@ -201,7 +201,7 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
         },
       );
     }
-    return null;
+    return true;
   }
 
   Widget _dialogTitle() {
@@ -268,7 +268,30 @@ class BannedCountriesChips extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Text("Banned countries"),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Banned countries"),
+                        ElevatedButton(
+                          onPressed: () async {
+                            DatabaseManager().clearBannedCountries();
+                          },
+                          style: ButtonStyle(
+                            padding: const MaterialStatePropertyAll(
+                                EdgeInsets.all(12.0)),
+                            maximumSize: const MaterialStatePropertyAll(
+                              Size(100, 50),
+                            ),
+                            shape: MaterialStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                            ),
+                          ),
+                          child: const Text("Clear all"),
+                        ),
+                      ],
+                    ),
                     Wrap(
                       children: bannedCountries
                           .map((bannedCountry) => Padding(

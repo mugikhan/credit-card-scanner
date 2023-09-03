@@ -14,7 +14,7 @@ class CreditCard {
   String? expiryMonth;
   int? expiryYear;
 
-  String? cvc;
+  String? cvv;
 
   String? issuingCountry;
 

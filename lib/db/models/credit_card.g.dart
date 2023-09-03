@@ -33,9 +33,9 @@ const CreditCardSchema = CollectionSchema(
       type: IsarType.string,
       enumMap: _CreditCardcardTypeEnumValueMap,
     ),
-    r'cvc': PropertySchema(
+    r'cvv': PropertySchema(
       id: 3,
-      name: r'cvc',
+      name: r'cvv',
       type: IsarType.string,
     ),
     r'expiryMonth': PropertySchema(
@@ -102,7 +102,7 @@ int _creditCardEstimateSize(
   }
   bytesCount += 3 + object.cardType.cardIssuerName.length * 3;
   {
-    final value = object.cvc;
+    final value = object.cvv;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -131,7 +131,7 @@ void _creditCardSerialize(
   writer.writeString(offsets[0], object.cardHolderName);
   writer.writeString(offsets[1], object.cardNumber);
   writer.writeString(offsets[2], object.cardType.cardIssuerName);
-  writer.writeString(offsets[3], object.cvc);
+  writer.writeString(offsets[3], object.cvv);
   writer.writeString(offsets[4], object.expiryMonth);
   writer.writeLong(offsets[5], object.expiryYear);
   writer.writeString(offsets[6], object.issuingCountry);
@@ -149,7 +149,7 @@ CreditCard _creditCardDeserialize(
   object.cardType =
       _CreditCardcardTypeValueEnumMap[reader.readStringOrNull(offsets[2])] ??
           CardIssuer.visa;
-  object.cvc = reader.readStringOrNull(offsets[3]);
+  object.cvv = reader.readStringOrNull(offsets[3]);
   object.expiryMonth = reader.readStringOrNull(offsets[4]);
   object.expiryYear = reader.readLongOrNull(offsets[5]);
   object.id = id;
@@ -849,36 +849,36 @@ extension CreditCardQueryFilter
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcIsNull() {
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'cvc',
+        property: r'cvv',
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcIsNotNull() {
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'cvc',
+        property: r'cvv',
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcEqualTo(
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'cvc',
+        property: r'cvv',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcGreaterThan(
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -886,14 +886,14 @@ extension CreditCardQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'cvc',
+        property: r'cvv',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcLessThan(
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -901,14 +901,14 @@ extension CreditCardQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'cvc',
+        property: r'cvv',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcBetween(
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -917,7 +917,7 @@ extension CreditCardQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'cvc',
+        property: r'cvv',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -927,69 +927,69 @@ extension CreditCardQueryFilter
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcStartsWith(
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'cvc',
+        property: r'cvv',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcEndsWith(
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'cvc',
+        property: r'cvv',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcContains(
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'cvc',
+        property: r'cvv',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcMatches(
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'cvc',
+        property: r'cvv',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcIsEmpty() {
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'cvc',
+        property: r'cvv',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvcIsNotEmpty() {
+  QueryBuilder<CreditCard, CreditCard, QAfterFilterCondition> cvvIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'cvc',
+        property: r'cvv',
         value: '',
       ));
     });
@@ -1475,15 +1475,15 @@ extension CreditCardQuerySortBy
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterSortBy> sortByCvc() {
+  QueryBuilder<CreditCard, CreditCard, QAfterSortBy> sortByCvv() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cvc', Sort.asc);
+      return query.addSortBy(r'cvv', Sort.asc);
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterSortBy> sortByCvcDesc() {
+  QueryBuilder<CreditCard, CreditCard, QAfterSortBy> sortByCvvDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cvc', Sort.desc);
+      return query.addSortBy(r'cvv', Sort.desc);
     });
   }
 
@@ -1564,15 +1564,15 @@ extension CreditCardQuerySortThenBy
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterSortBy> thenByCvc() {
+  QueryBuilder<CreditCard, CreditCard, QAfterSortBy> thenByCvv() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cvc', Sort.asc);
+      return query.addSortBy(r'cvv', Sort.asc);
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QAfterSortBy> thenByCvcDesc() {
+  QueryBuilder<CreditCard, CreditCard, QAfterSortBy> thenByCvvDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cvc', Sort.desc);
+      return query.addSortBy(r'cvv', Sort.desc);
     });
   }
 
@@ -1650,10 +1650,10 @@ extension CreditCardQueryWhereDistinct
     });
   }
 
-  QueryBuilder<CreditCard, CreditCard, QDistinct> distinctByCvc(
+  QueryBuilder<CreditCard, CreditCard, QDistinct> distinctByCvv(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'cvc', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'cvv', caseSensitive: caseSensitive);
     });
   }
 
@@ -1705,9 +1705,9 @@ extension CreditCardQueryProperty
     });
   }
 
-  QueryBuilder<CreditCard, String?, QQueryOperations> cvcProperty() {
+  QueryBuilder<CreditCard, String?, QQueryOperations> cvvProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'cvc');
+      return query.addPropertyName(r'cvv');
     });
   }
 

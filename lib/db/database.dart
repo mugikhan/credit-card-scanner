@@ -77,6 +77,19 @@ class DatabaseManager {
     }
   }
 
+  void clearBannedCountries() {
+    try {
+      final bannedCountries = isar.bannedCountrys.where().findAllSync();
+      for (var bannedCountry in bannedCountries) {
+        isar.writeTxnSync(() {
+          isar.bannedCountrys.deleteSync(bannedCountry.id);
+        });
+      }
+    } catch (_) {
+      rethrow;
+    }
+  }
+
   Future<List<BannedCountry>> getBannedCountries() async {
     return await isar.bannedCountrys.where().findAll();
   }

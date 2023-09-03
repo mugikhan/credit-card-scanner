@@ -36,8 +36,7 @@ class _CreditCardsViewState extends State<CreditCardsView> {
                           const Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 8.0, vertical: 4.0),
-                            child:
-                                Text("Tap the cards to see the CVC/CVV code"),
+                            child: Text("Tap the cards to see the CVV code"),
                           ),
                           Expanded(
                             child: ListView.builder(
@@ -52,7 +51,7 @@ class _CreditCardsViewState extends State<CreditCardsView> {
                             ),
                           ),
                           const SizedBox(
-                            height: 60,
+                            height: 100,
                           )
                         ],
                       ),
@@ -328,7 +327,7 @@ class _CreditCardBuilderState extends State<CreditCardBuilder> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      widget.creditCard.cvc ?? "",
+                      widget.creditCard.cvv ?? "",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,

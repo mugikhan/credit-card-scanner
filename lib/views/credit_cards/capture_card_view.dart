@@ -45,7 +45,7 @@ class _CaptureCardViewState extends State<CaptureCardView> {
   final _formKey = GlobalKey<FormState>();
   final _cardNumberController = TextEditingController();
   final _cardholderController = TextEditingController();
-  final _cvcController = TextEditingController();
+  final _cvvController = TextEditingController();
 
   String _expiryMonth = "01";
   int _expiryYear = 2023;
@@ -97,7 +97,7 @@ class _CaptureCardViewState extends State<CaptureCardView> {
 
     _cardNumberController.addListener(_updateCreditCardNumber);
     _cardholderController.addListener(_updateCardHolder);
-    _cvcController.addListener(_updateCVC);
+    _cvvController.addListener(_updateCVC);
 
     final inputImage = InputImage.fromFilePath(widget.imagePath);
     _getImageSize(File(widget.imagePath)).then((_) {
@@ -110,7 +110,7 @@ class _CaptureCardViewState extends State<CaptureCardView> {
     _textRecognizer.close();
     _cardNumberController.dispose();
     _cardholderController.dispose();
-    _cvcController.dispose();
+    _cvvController.dispose();
     super.dispose();
   }
 
@@ -144,8 +144,8 @@ class _CaptureCardViewState extends State<CaptureCardView> {
   }
 
   void _updateCVC() {
-    if (_cvcController.text.isNotEmpty) {
-      _creditCard.cvc = _cvcController.text;
+    if (_cvvController.text.isNotEmpty) {
+      _creditCard.cvv = _cvvController.text;
     }
   }
 
@@ -165,7 +165,7 @@ class _CaptureCardViewState extends State<CaptureCardView> {
                     const Padding(
                       padding:
                           EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                      child: Text("Tap the card to see the CVC/CVV code"),
+                      child: Text("Tap the card to see the CVV code"),
                     ),
                     ElevatedButton.icon(
                       onPressed: () async {
@@ -243,14 +243,14 @@ class _CaptureCardViewState extends State<CaptureCardView> {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: FormTextField(
-                                    label: "CVC",
-                                    controller: _cvcController,
+                                    label: "CVV",
+                                    controller: _cvvController,
                                     maxLength: 3,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Please enter a cvc number';
+                                        return 'Please enter a cvv code';
                                       } else if (value.length != 3) {
-                                        return 'Please enter a 3 digit cvc number';
+                                        return 'Please enter a 3 digit cvv code';
                                       }
                                       return null;
                                     },
@@ -266,7 +266,7 @@ class _CaptureCardViewState extends State<CaptureCardView> {
                                   formKey: _formKey,
                                   cardNumberController: _cardNumberController,
                                   cardHolderController: _cardholderController,
-                                  cvcController: _cvcController,
+                                  cvcController: _cvvController,
                                   month: _expiryMonth,
                                   year: _expiryYear,
                                   issuingCountry: _issuingCountry,
@@ -298,26 +298,8 @@ class _CaptureCardViewState extends State<CaptureCardView> {
         child: FormDropdownField<CardIssuer>(
             label: "Card type",
             value: _cardIssuer,
-            items: CardIssuer.values.map((issuer) {
-              return DropdownMenuItem(
-                value: issuer,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        issuer.cardIssuerName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          height: 1.2,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
+            items: CardIssuer.values.take(2).toList(),
+            itemAsString: (CardIssuer cardIssuer) => cardIssuer.cardIssuerName,
             onChanged: (CardIssuer? value) {
               _updateCardIssuer(value!);
             }),
@@ -333,56 +315,21 @@ class _CaptureCardViewState extends State<CaptureCardView> {
           child: FormDropdownField<String>(
               label: "Month",
               value: _expiryMonth,
-              items: _months.map((month) {
-                return DropdownMenuItem(
-                  value: month,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          month,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            height: 1.2,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
+              items: _months,
               onChanged: (String? value) {
                 setState(() {
                   _expiryMonth = value!;
                 });
               }),
         ),
+        const SizedBox(
+          width: 16,
+        ),
         Flexible(
           child: FormDropdownField<int>(
               label: "Year",
               value: _expiryYear,
-              items: _years.map((year) {
-                return DropdownMenuItem(
-                  value: year,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "$year",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            height: 1.2,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
+              items: _years,
               onChanged: (int? value) {
                 setState(() {
                   _expiryYear = value!;
@@ -443,14 +390,14 @@ class _CaptureCardViewState extends State<CaptureCardView> {
 
   void parseResults(List<TextBlock> blocks) {
     RegExp regex = RegExp(
-      r'\s*(\bEzzyBooks\b|\bMONTH/YEAR\b|\bBank\sName\b|\bVISA\b|\bbiometric\b|\bVALID\b|\bTHRU\b|\bCVC\b|\bmastercard\b)(?:.*-*\s*)',
+      r'\s*(\bEzzyBooks\b|\bMONTH/YEAR\b|\bBank\sName\b|\bVISA\b|\bbiometric\b|\bVALID\b|\bTHRU\b|\bCVC\b|\bmastercard\b|\bvisa\b)(?:.*-*\s*)',
       caseSensitive: false,
     );
     if (blocks.isNotEmpty) {
       // Credit Card Number
       String? creditCardNumber = blocks
           .firstWhereOrNull((block) =>
-              block.text.length > 14 &&
+              block.text.length > 12 &&
               ["1", "4", "5", "3", "6"].contains(block.text[0]))
           ?.text;
       // Expiry Date
@@ -462,13 +409,14 @@ class _CaptureCardViewState extends State<CaptureCardView> {
           ?.text;
       //  var expiryDate = expiryDateString?.filter({ $0.isNumber || $0 == "/" })
 
-      String? cvcString = blocks
-          .firstWhereOrNull(
-              (block) => block.text.length <= 7 && block.text.contains("CVC"))
+      String? cvvString = blocks
+          .firstWhereOrNull((block) =>
+              block.text.length <= 7 &&
+              (block.text.contains("CVC") || block.text.contains("CVV")))
           ?.text;
-      String? cvc = cvcString?.split(" ")[1];
+      String? cvv = cvvString?.split(" ")[1];
       // Name
-      var newIgnoreString = "$creditCardNumber $expiryDateString $cvcString";
+      var newIgnoreString = "$creditCardNumber $expiryDateString $cvvString";
       String? name = blocks
           .lastWhereOrNull((block) =>
               !regex.hasMatch(block.text) &&
@@ -499,9 +447,9 @@ class _CaptureCardViewState extends State<CaptureCardView> {
           _creditCard.expiryYear = formattedDate.year;
         }
       }
-      if (cvc != null && cvc.length == 3) {
-        _cvcController.text = cvc;
-        _creditCard.cvc = cvc;
+      if (cvv != null && cvv.length == 3) {
+        _cvvController.text = cvv;
+        _creditCard.cvv = cvv;
       }
       setState(() {});
       return;
@@ -551,12 +499,7 @@ class _CountryDropdownState extends State<CountryDropdown> {
               children: [
                 FormDropdownField<String>(
                   label: "Issuing country",
-                  items: _allCountries.map((country) {
-                    return DropdownMenuItem(
-                      value: country,
-                      child: Text(country),
-                    );
-                  }).toList(),
+                  items: _allCountries,
                   onChanged: (value) {
                     if (value != null) {
                       widget.setIssuingCountry(value);
@@ -566,6 +509,7 @@ class _CountryDropdownState extends State<CountryDropdown> {
                     }
                   },
                   value: _selectedCountry,
+                  showSearchBox: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please select an issuing country';
@@ -607,18 +551,18 @@ class SaveCardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return ElevatedButton.icon(
       onPressed: () async {
         if (formKey.currentState!.validate()) {
           String creditCardNumber = cardNumberController.text;
           String name = cardHolderController.text;
-          String cvc = cvcController.text;
+          String cvv = cvcController.text;
           CreditCard creditCard = CreditCard()
             ..cardNumber = creditCardNumber
             ..cardHolderName = name
             ..expiryMonth = month
             ..expiryYear = year
-            ..cvc = cvc
+            ..cvv = cvv
             ..issuingCountry = issuingCountry
             ..cardType = cardIssuer;
           try {
@@ -639,7 +583,22 @@ class SaveCardButton extends StatelessWidget {
           }
         }
       },
-      child: const Text('Save card'),
+      style: ButtonStyle(
+        padding: const MaterialStatePropertyAll(EdgeInsets.all(12.0)),
+        maximumSize: const MaterialStatePropertyAll(
+          Size(200, 50),
+        ),
+        shape: MaterialStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+        textStyle: const MaterialStatePropertyAll(
+          TextStyle(fontSize: 16),
+        ),
+      ),
+      icon: const Icon(Icons.save),
+      label: const Text('Save card'),
     );
   }
 }
