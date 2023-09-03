@@ -22,6 +22,7 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
   List<String> _allCountries = [];
 
   final _searchController = TextEditingController();
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -54,105 +55,124 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
           return false;
         },
         child: Scaffold(
-            appBar: AppBar(title: const Text('Select banned countries')),
-            body: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: FormTextField(
-                    label: "Search...",
-                    controller: _searchController,
-                    onChanged: (String? value) {
-                      _searchResults.clear();
-                      if (value != null && value.length > 3) {
-                        for (var country in _allCountries) {
-                          if (country
-                              .toLowerCase()
-                              .contains(value.toLowerCase())) {
-                            _searchResults.add(country);
+            appBar: AppBar(
+              title: const Text('Select banned countries'),
+            ),
+            body: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: FormTextField(
+                      label: "Search...",
+                      controller: _searchController,
+                      focusNode: _focusNode,
+                      onChanged: (String? value) {
+                        _searchResults.clear();
+                        if (value != null && value.length > 3) {
+                          for (var country in _allCountries) {
+                            if (country
+                                .toLowerCase()
+                                .contains(value.toLowerCase())) {
+                              _searchResults.add(country);
+                            }
                           }
                         }
-                      }
-                      setState(() {});
-                    },
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            color: Colors.black,
-                            onPressed: () {
-                              setState(() {
-                                _searchResults.clear();
-                                _searchController.clear();
-                              });
-                            },
-                          )
-                        : const SizedBox(
-                            width: 0,
-                            height: 0,
-                          ),
+                        setState(() {});
+                      },
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              color: Colors.black,
+                              onPressed: () {
+                                setState(() {
+                                  _searchResults.clear();
+                                  _searchController.clear();
+                                });
+                              },
+                            )
+                          : const SizedBox(
+                              width: 0,
+                              height: 0,
+                            ),
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: StreamBuilder<List<BannedCountry>>(
-                      stream: DatabaseManager().watchBannedCountries(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                                ConnectionState.active &&
-                            snapshot.hasData) {
-                          List<BannedCountry> bannedCountries = snapshot.data!;
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              BannedCountriesChips(
-                                bannedCountries: bannedCountries,
-                                removeCountry: removeCountry,
-                              ),
-                              Expanded(
-                                child: _searchResults.isEmpty
-                                    ? ListView.builder(
-                                        key: const PageStorageKey(0),
-                                        shrinkWrap: true,
-                                        controller: ScrollController(),
-                                        itemCount: _allCountries.length,
-                                        itemBuilder: (context, index) {
-                                          String country = _allCountries[index];
-                                          return CountryItem(
-                                            country: country,
-                                            addCountry: addCountry,
-                                            selected: bannedCountries.any(
-                                                (element) =>
-                                                    element.country == country),
-                                          );
-                                        },
-                                      )
-                                    : ListView.builder(
-                                        key: const PageStorageKey(1),
-                                        shrinkWrap: true,
-                                        controller: ScrollController(),
-                                        itemCount: _searchResults.length,
-                                        itemBuilder: (context, index) {
-                                          String country =
-                                              _searchResults[index];
-                                          return CountryItem(
-                                            country: country,
-                                            addCountry: addCountry,
-                                            selected: bannedCountries.any(
-                                                (element) =>
-                                                    element.country == country),
-                                          );
-                                        },
-                                      ),
-                              )
-                            ],
+                  Expanded(
+                    child: StreamBuilder<List<BannedCountry>>(
+                        stream: DatabaseManager().watchBannedCountries(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.active &&
+                              snapshot.hasData) {
+                            List<BannedCountry> bannedCountries =
+                                snapshot.data!;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                BannedCountriesChips(
+                                  bannedCountries: bannedCountries,
+                                  removeCountry: removeCountry,
+                                ),
+                                Expanded(
+                                    child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white70,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(16),
+                                      topRight: Radius.circular(16),
+                                    ),
+                                  ),
+                                  child: _searchResults.isEmpty
+                                      ? ListView.builder(
+                                          key: const PageStorageKey(0),
+                                          shrinkWrap: true,
+                                          controller: ScrollController(),
+                                          itemCount: _allCountries.length,
+                                          itemBuilder: (context, index) {
+                                            String country =
+                                                _allCountries[index];
+                                            return CountryItem(
+                                              country: country,
+                                              addCountry: addCountry,
+                                              selected: bannedCountries.any(
+                                                  (element) =>
+                                                      element.country ==
+                                                      country),
+                                            );
+                                          },
+                                        )
+                                      : ListView.builder(
+                                          key: const PageStorageKey(1),
+                                          shrinkWrap: true,
+                                          controller: ScrollController(),
+                                          itemCount: _searchResults.length,
+                                          itemBuilder: (context, index) {
+                                            String country =
+                                                _searchResults[index];
+                                            return CountryItem(
+                                              country: country,
+                                              addCountry: addCountry,
+                                              selected: bannedCountries.any(
+                                                  (element) =>
+                                                      element.country ==
+                                                      country),
+                                            );
+                                          },
+                                        ),
+                                ))
+                              ],
+                            );
+                          }
+                          return const Center(
+                            child: CircularProgressIndicator(),
                           );
-                        }
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }),
-                ),
-              ],
+                        }),
+                  ),
+                ],
+              ),
             )),
       ),
     );
@@ -239,7 +259,7 @@ class BannedCountriesChips extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             width: MediaQuery.of(context).size.width,
             constraints: const BoxConstraints(
-              maxHeight: 230,
+              maxHeight: 140,
             ),
             child: Scrollbar(
               child: SingleChildScrollView(

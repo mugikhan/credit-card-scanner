@@ -13,6 +13,7 @@ class FormTextField extends StatelessWidget {
     this.onEditingComplete,
     this.suffixIcon,
     this.maxLength,
+    this.focusNode,
   }) : super(key: key);
 
   final TextEditingController? controller;
@@ -24,11 +25,13 @@ class FormTextField extends StatelessWidget {
   final Function()? onEditingComplete;
   final Widget? suffixIcon;
   final int? maxLength;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       onChanged: onChanged,
       onEditingComplete: onEditingComplete,
       decoration: InputDecoration(
