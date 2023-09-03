@@ -578,6 +578,8 @@ class SaveCardButton extends StatelessWidget {
           } on ItemExistsException {
             CustomSnackbarService()
                 .showErrorSnackbar("This card has already been saved.");
+          } on GeneralException catch (ex) {
+            CustomSnackbarService().showErrorSnackbar(ex.error);
           } catch (error) {
             debugPrint("Unknown error $error");
           }

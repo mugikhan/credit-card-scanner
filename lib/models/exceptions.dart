@@ -6,3 +6,7 @@ class CustomException implements Exception {
 class ItemExistsException extends CustomException {
   ItemExistsException(super.error);
 }
+
+class GeneralException extends CustomException {
+  GeneralException(super.error);
+}

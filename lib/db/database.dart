@@ -44,14 +44,18 @@ class DatabaseManager {
         await isar.creditCards.put(creditCard);
       });
     } catch (_) {
-      rethrow;
+      throw GeneralException("Something went wrong, please try again!");
     }
   }
 
   void removeCard(CreditCard creditCard) {
-    isar.writeTxnSync(() {
-      isar.creditCards.deleteByCardNumberSync(creditCard.cardNumber);
-    });
+    try {
+      isar.writeTxnSync(() {
+        isar.creditCards.deleteByCardNumberSync(creditCard.cardNumber);
+      });
+    } catch (_) {
+      throw GeneralException("Something went wrong, please try again!");
+    }
   }
 
   void addBannedCountry(String country) {
@@ -69,7 +73,7 @@ class DatabaseManager {
         });
       }
     } catch (_) {
-      rethrow;
+      throw GeneralException("Something went wrong, please try again!");
     }
   }
 
@@ -79,7 +83,7 @@ class DatabaseManager {
         isar.bannedCountrys.deleteByCountrySync(country);
       });
     } catch (_) {
-      rethrow;
+      throw GeneralException("Something went wrong, please try again!");
     }
   }
 
@@ -92,7 +96,7 @@ class DatabaseManager {
         });
       }
     } catch (_) {
-      rethrow;
+      throw GeneralException("Something went wrong, please try again!");
     }
   }
 

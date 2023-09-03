@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_card_scanner/models/exceptions.dart';
+import 'package:flutter_card_scanner/services/custom_snackbar.dart';
 import 'package:flutter_card_scanner/views/countries/select_banned_countries.dart';
 import 'package:flutter_card_scanner/models/card_issuer.dart';
 import 'package:flutter_card_scanner/db/database.dart';
@@ -240,7 +242,11 @@ class _CreditCardBuilderState extends State<CreditCardBuilder> {
                   const Divider(),
                   InkWell(
                     onTap: () {
-                      DatabaseManager().removeCard(widget.creditCard);
+                      try {
+                        DatabaseManager().removeCard(widget.creditCard);
+                      } on GeneralException catch (ex) {
+                        CustomSnackbarService().showErrorSnackbar(ex.error);
+                      }
                       Navigator.pop(context);
                     },
                     child: Row(

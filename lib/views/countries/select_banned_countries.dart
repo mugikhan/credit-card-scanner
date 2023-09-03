@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_scanner/constants/constants.dart';
 import 'package:flutter_card_scanner/db/database.dart';
 import 'package:flutter_card_scanner/db/models/banned_countries.dart';
+import 'package:flutter_card_scanner/models/exceptions.dart';
+import 'package:flutter_card_scanner/services/custom_snackbar.dart';
 import 'package:flutter_card_scanner/theme/app_colors.dart';
 import 'package:flutter_card_scanner/widgets/custom_textfield.dart';
 
@@ -32,15 +34,19 @@ class _SelectBannedCountriesViewState extends State<SelectBannedCountriesView> {
   }
 
   void addCountry(String country) {
-    setState(() {
+    try {
       DatabaseManager().addBannedCountry(country);
-    });
+    } on GeneralException catch (ex) {
+      CustomSnackbarService().showErrorSnackbar(ex.error);
+    }
   }
 
   void removeCountry(String country) {
-    setState(() {
+    try {
       DatabaseManager().removeBannedCountry(country);
-    });
+    } on GeneralException catch (ex) {
+      CustomSnackbarService().showErrorSnackbar(ex.error);
+    }
   }
 
   @override
@@ -274,7 +280,12 @@ class BannedCountriesChips extends StatelessWidget {
                         const Text("Banned countries"),
                         ElevatedButton(
                           onPressed: () async {
-                            DatabaseManager().clearBannedCountries();
+                            try {
+                              DatabaseManager().clearBannedCountries();
+                            } on GeneralException catch (ex) {
+                              CustomSnackbarService()
+                                  .showErrorSnackbar(ex.error);
+                            }
                           },
                           style: ButtonStyle(
                             padding: const MaterialStatePropertyAll(
